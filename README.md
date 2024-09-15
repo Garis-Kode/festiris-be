@@ -49,8 +49,3 @@ After ensuring the system requirements are met, follow these steps to set up the
     php artisan db:seed
     ```
 
-7. Install base data for the application:
-
-    ```bash
-    php artisan app:install
-    ```
