@@ -5,6 +5,7 @@
 /public/storage
 /storage/*.key
 /vendor
+.rnd
 .env
 .env.backup
 .env.production
@@ -19,3 +20,4 @@ yarn-error.log
 /.idea
 /.vscode
 /.zed
+~/
