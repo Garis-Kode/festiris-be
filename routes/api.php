@@ -10,5 +10,7 @@ use App\Helpers\Router;
 // })->middleware('auth:api');
 
 Route::prefix('v1')->group(function () {
-    Router::includeFiles(__DIR__ . '/api/v1/Auth');
+    Route::group(['prefix' => 'auth'], function () {
+        Router::includeFiles(__DIR__ . '/api/v1/Auth');
+    });
 });

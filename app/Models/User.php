@@ -3,10 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Support\Str;
+use Laravel\Passport\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -48,5 +49,16 @@ class User extends Authenticatable
             'photo_path'        => 'array',
             'is_active'         => 'boolean',
         ];
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = Str::uuid()->toString();
+            }
+        });
     }
 }

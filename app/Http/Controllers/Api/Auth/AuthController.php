@@ -2,34 +2,27 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
+use App\Helpers\Response;
 use Illuminate\Http\Request;
-use App\Interfaces\AuthInterface;
-use Illuminate\Support\Facades\DB;
+use App\Services\Auth\AuthService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Http\Requests\Auth\RegistrationRequest;
 
 class AuthController extends Controller
 {
-    private AuthInterface $authRepository;
+    private $authService;
 
-    public function __construct(AuthInterface $authRepository)
+    public function __construct(AuthService $authService)
     {
-        $this->authRepository = $authRepository;
+        $this->authService = $authService;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     * @throws Throwable
-     */
     public function register(RegistrationRequest $request)
     {
-        $userRegistration = DB::transaction(function () use ($request) {
-            return $this->authRepository->store($request);
-        });
-
+        $userRegister = $this->authService->register($request->only(['email', 'password']));
         return Response::success(
-            new UserResource($userRegistration), 'Account created successfully.', Response::STATUS_CREATED
+            new UserResource($userRegister), 'Account created successfully.', Response::STATUS_CREATED
         );
     }
 }
