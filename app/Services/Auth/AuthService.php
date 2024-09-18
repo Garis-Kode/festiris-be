@@ -2,7 +2,9 @@
 
 namespace App\Services\Auth;
 
-interface AuthService{
+use LaravelEasyRepository\BaseService;
+
+interface AuthService extends BaseService{
 
     /**
      * Create new user

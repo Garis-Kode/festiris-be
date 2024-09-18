@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'photo_path',
         'is_active',
+        'verified_token',
     ];
 
     /**
