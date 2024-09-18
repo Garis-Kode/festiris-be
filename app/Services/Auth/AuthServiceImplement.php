@@ -2,16 +2,17 @@
 
 namespace App\Services\Auth;
 
+use Illuminate\Support\Facades\Mail;
 use LaravelEasyRepository\ServiceApi;
 use App\Repositories\User\UserRepository;
 
 class AuthServiceImplement extends ServiceApi implements AuthService{
 
-     /**
-     * don't change $this->mainRepository variable name
-     * because used in extends service class
-     */
+    /**
+     * var mainRepository
+    */
      protected $mainRepository;
+
 
     public function __construct(UserRepository $mainRepository)
     {
@@ -24,6 +25,11 @@ class AuthServiceImplement extends ServiceApi implements AuthService{
      * @return array|mixed
      */
     public function register($data){
-      return $this->mainRepository->create($data);
+      $result = $this->mainRepository->create($data);
+      Mail::send('email.verified', ['token' => $result->verified_token, 'email' => $result->email], function ($message) use ($result) {
+        $message->to($result->email);
+        $message->subject('Verifikasi Akun');
+      });
+      return $result;
     }
 }
