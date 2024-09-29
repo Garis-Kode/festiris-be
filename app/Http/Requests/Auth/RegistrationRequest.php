@@ -28,7 +28,7 @@ class RegistrationRequest extends FormRequest
     {
         $this->merge([
             'password' => Hash::make($this->input('password')),
-            'verifiedToken' => Str::random(64),
+            'verified_token' => Str::random(64)
         ]);
     }
 
