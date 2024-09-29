@@ -1,62 +1,71 @@
 services:
-    laravel.test:
+    app:
         build:
-            context: './vendor/laravel/sail/runtimes/8.3'
+            context: .
             dockerfile: Dockerfile
-            args:
-                WWWGROUP: '${WWWGROUP}'
-        image: 'sail-8.3/app'
-        extra_hosts:
-            - 'host.docker.internal:host-gateway'
-        ports:
-            - '${APP_PORT:-80}:80'
-            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
-        environment:
-            WWWUSER: '${WWWUSER}'
-            LARAVEL_SAIL: 1
-            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
-            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
-            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+        tty: true
         volumes:
-            - '.:/var/www/html'
+            - ./:/var/www
+            - ./.docker/php-fpm/local.ini:/usr/local/etc/php/conf.d/local.ini
         networks:
-            - sail
+            - app-network
+    nginx:
+        image: nginx
+        tty: true
+        ports:
+            - '8989:80'
+            - '443:443'
+        env_file:
+            - .env
+        volumes:
+            - ./:/var/www
+            - ./.docker/nginx/:/etc/nginx/conf.d/
+        networks:
+            - app-network
+    db:
+        image: postgres:latest
+        tty: true
+        ports:
+            - '5432:5432'
+        environment:
+            POSTGRES_DB: ${DB_DATABASE}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_USER: ${DB_USERNAME}
+            SERVICE_TAGS: dev
+            SERVICE_NAME: postgres
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+        networks:
+            - app-network
+    pgadmin:
+        image: dpage/pgadmin4
+        tty: true
+        ports:
+            - '5050:80'
+        environment:
+            PGADMIN_DEFAULT_EMAIL: 'pgadmin@example.com'
+            PGADMIN_DEFAULT_PASSWORD: 'admin'
+        networks:
+            - app-network
         depends_on:
-            - pgsql
-    pgsql:
-        image: 'postgres:15'
+            - db
+    mailhog:
+        image: mailhog/mailhog
+        tty: true
         ports:
-            - '${FORWARD_DB_PORT:-5432}:5432'
-        environment:
-            PGPASSWORD: '${DB_PASSWORD:-secret}'
-            POSTGRES_DB: '${DB_DATABASE}'
-            POSTGRES_USER: '${DB_USERNAME}'
-            POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
-        volumes:
-            - 'sail-pgsql:/var/lib/postgresql/data'
-            - './vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+            - '8025:8025'
         networks:
-            - sail
-        healthcheck:
-            test:
-                - CMD
-                - pg_isready
-                - '-q'
-                - '-d'
-                - '${DB_DATABASE}'
-                - '-U'
-                - '${DB_USERNAME}'
-            retries: 3
-            timeout: 5s
-    adminer:
-        image: 'adminer:latest'
+            - app-network
+    redis:
+        image: redis:alpine
+        tty: true
         ports:
-            - 8080:8080
+            - '6379:6379'
         networks:
-            - sail
+            - app-network
 networks:
-    sail:
+    app-network:
         driver: bridge
 volumes:
-    sail-pgsql:
+    postgres-data:
         driver: local

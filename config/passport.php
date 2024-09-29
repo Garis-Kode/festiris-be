@@ -72,4 +72,8 @@ return [
         'secret' => env('PASSPORT_PERSONAL_ACCESS_CLIENT_SECRET'),
     ],
 
+    'grant_client' => [
+        'id' => env('PASSPORT_GRANT_CLIENT_ID'),
+        'secret' => env('PASSPORT_GRANT_CLIENT_SECRET'),
+    ],
 ];

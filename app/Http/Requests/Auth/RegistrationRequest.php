@@ -2,26 +2,23 @@
 
 namespace App\Http\Requests\Auth;
 
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class RegistrationRequest extends FormRequest
 {
     /**
-    * Mapping between form request fields and corresponding model columns.
-    *
-    * @var array
-    */
+     * Mapping between form request fields and corresponding model columns.
+     */
     public array $mapFields = [
-        'email'                  => 'email',
-        'password'               => 'password',
+        'email' => 'email',
+        'password' => 'password',
     ];
 
-   /**
-    * Determine if the user is authorized to make this request.
-    */
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         return true;
@@ -31,7 +28,7 @@ class RegistrationRequest extends FormRequest
     {
         $this->merge([
             'password' => Hash::make($this->input('password')),
-            'verified_token' => Str::random(64)
+            'verified_token' => Str::random(64),
         ]);
     }
 
@@ -43,8 +40,8 @@ class RegistrationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email'                  => ['required', 'string', 'email:filter', 'unique:users,email'],
-            'password'               => ['required', 'string', 'min:8'],
+            'email' => ['required', 'string', 'email:filter', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8'],
         ];
     }
 
@@ -52,13 +49,13 @@ class RegistrationRequest extends FormRequest
     {
         return [
             'email.required' => 'Email is required',
-            'email.string'   => 'Email must be string',
-            'email.email'    => 'Email is invalid',
-            'email.unique'   => 'Email is already registered',
+            'email.string' => 'Email must be string',
+            'email.email' => 'Email is invalid',
+            'email.unique' => 'Email is already registered',
 
             'password.required' => 'Password is required',
-            'password.string'   => 'Password must be string',
-            'password.min'      => 'Password min 8 characters',
+            'password.string' => 'Password must be string',
+            'password.min' => 'Password min 8 characters',
         ];
     }
 }
