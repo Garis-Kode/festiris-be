@@ -20,6 +20,13 @@ class UserRepositoryImplement extends Eloquent implements UserRepository
         $this->model = $model;
     }
 
-    // Write something awesome :)
+    public function register(string $email, string $password, string $verifiedToken): User
+    {
+        return $this->model->create([
+            'email' => $email,
+            'password' => $password, // Pastikan password di-hash
+            'verified_token' => $verifiedToken
+        ]);
+    }
 
 }

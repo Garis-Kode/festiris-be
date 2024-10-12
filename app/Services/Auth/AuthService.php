@@ -6,7 +6,7 @@ use LaravelEasyRepository\BaseService;
 
 interface AuthService extends BaseService
 {
-    public function register($data);
+    public function register(string $email, string $password, string $verifiedToken);
 
     public function login(string $email, string $password);
 

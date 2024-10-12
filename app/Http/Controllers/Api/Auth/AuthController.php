@@ -17,10 +17,9 @@ class AuthController extends Controller
 
     public function register(RegistrationRequest $request)
     {
-        $userRegister = $this->authService->register($request->only(['email', 'password', 'verified_token']));
-
+        $data = $this->authService->register($request->validated('email'), $request->validated('password'), $request->verified_token);
         return Response::success(
-            new UserResource($userRegister), 'Account created successfully.', Response::STATUS_CREATED
+            new UserResource($data), 'Account created successfully.', Response::STATUS_CREATED
         );
     }
 

@@ -2,17 +2,19 @@
 
 namespace App\Services\Auth;
 
-use App\Exceptions\UnauthorizedException;
-use App\Exceptions\UnexpectedErrorException;
+use Exception;
+use App\Models\User;
 use App\Helpers\Response;
-use App\Http\Resources\AuthTokenResource;
 use App\Http\Resources\UserResource;
-use App\Repositories\User\UserRepository;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use LaravelEasyRepository\ServiceApi;
+use App\Exceptions\UnauthorizedException;
+use App\Http\Resources\AuthTokenResource;
+use App\Repositories\User\UserRepository;
+use App\Exceptions\UnexpectedErrorException;
+use Illuminate\Http\Client\ConnectionException;
 
 class AuthServiceImplement extends ServiceApi implements AuthService
 {
@@ -24,15 +26,18 @@ class AuthServiceImplement extends ServiceApi implements AuthService
      * @param  array|mixed  $data
      * @return array|mixed
      */
-    public function register($data)
+    public function register(string $email, string $password, string $verifiedToken)
     {
-        $result = $this->mainRepository->create($data);
-        Mail::send('email.verified', ['token' => $result->verified_token, 'email' => $result->email], function ($message) use ($result) {
-            $message->to($result->email);
-            $message->subject('Verifikasi Akun');
-        });
-
-        return $result;
+        try {
+            $data = $this->mainRepository->register($email, $password, $verifiedToken, $email);
+            Mail::send('email.verified', ['token' => $verifiedToken, 'userId' => $data->uuid, 'email' => $email], function ($message) use ($email) {
+                $message->to($email);
+                $message->subject('Verifikasi Akun');
+            });
+            return $data;
+        } catch (Exception $exception) {
+            throw new UnexpectedErrorException($exception);
+        }
     }
 
     /**
