@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Helpers\Response;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\MailResendRequest;
+use App\Http\Requests\Auth\RegistrationCompletedRequest;
 use App\Http\Requests\Auth\RegistrationRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RefreshTokenRequest;
@@ -17,10 +19,24 @@ class AuthController extends Controller
 
     public function register(RegistrationRequest $request)
     {
-        $userRegister = $this->authService->register($request->only(['email', 'password', 'verified_token']));
-
+        $data = $this->authService->register($request->validated('email'), $request->validated('password'), $request->verified_token);
         return Response::success(
-            new UserResource($userRegister), 'Account created successfully.', Response::STATUS_CREATED
+            new UserResource($data), 'Account created successfully.', Response::STATUS_CREATED
+        );
+    }
+    
+    public function resendRegistrationMail(MailResendRequest $request){
+        $this->authService->resendRegistrationMail($request->validated('email'));
+        return Response::success(null, 'Mail sent successfully.');
+    }
+
+
+    public function registrationCompleted($verifiedToken, $userUuid, RegistrationCompletedRequest $request)
+    {
+        // dd([$verifiedToken, $userUuid]);
+        $data = $this->authService->registrationCompleted($verifiedToken, $userUuid, $request->validated('firstName'), $request->validated('lastName'), $request->validated('gender'));
+        return Response::success(
+            new UserResource($data), 'Account completed successfully.'
         );
     }
 

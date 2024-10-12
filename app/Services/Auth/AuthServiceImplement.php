@@ -2,17 +2,20 @@
 
 namespace App\Services\Auth;
 
-use App\Exceptions\UnauthorizedException;
-use App\Exceptions\UnexpectedErrorException;
+use App\Exceptions\BadRequestException;
+use Exception;
+use App\Models\User;
 use App\Helpers\Response;
-use App\Http\Resources\AuthTokenResource;
 use App\Http\Resources\UserResource;
-use App\Repositories\User\UserRepository;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use LaravelEasyRepository\ServiceApi;
+use App\Exceptions\UnauthorizedException;
+use App\Http\Resources\AuthTokenResource;
+use App\Repositories\User\UserRepository;
+use App\Exceptions\UnexpectedErrorException;
+use Illuminate\Http\Client\ConnectionException;
 
 class AuthServiceImplement extends ServiceApi implements AuthService
 {
@@ -21,18 +24,58 @@ class AuthServiceImplement extends ServiceApi implements AuthService
     /**
      * Create new user data
      *
-     * @param  array|mixed  $data
+     * @param string  $email
+     * @param string  $password
+     * @param string  $verifiedToken
      * @return array|mixed
+     * @throws UnexpectedErrorException
+     * 
      */
-    public function register($data)
+    public function register(string $email, string $password, string $verifiedToken)
     {
-        $result = $this->mainRepository->create($data);
-        Mail::send('email.verified', ['token' => $result->verified_token, 'email' => $result->email], function ($message) use ($result) {
-            $message->to($result->email);
+        $response = $this->mainRepository->register($email, $password, $verifiedToken, $email);
+        Mail::send('email.verified', ['token' => $verifiedToken, 'userId' => $response->uuid, 'email' => $email], function ($message) use ($email) {
+            $message->to($email);
             $message->subject('Verifikasi Akun');
         });
+        return $response;
+    }
 
-        return $result;
+     /**
+     * Resend registration email
+     * @param string $email
+     * @return User|
+     * @throws BadRequestException
+     */
+    public function resendRegistrationMail(string $email)
+    {
+        $data =  $this->mainRepository->findByEmail($email);
+        if ($data->email_verify_at){
+            throw new BadRequestException('Account has been verified');
+        }
+        Mail::send('email.verified', ['token' => $data->verified_token, 'userId' => $data->uuid, 'email' => $data->email], function ($message) use ($data) {
+            $message->to($data->email);
+            $message->subject('Verifikasi Akun');
+        });
+    }
+
+    /**
+     * Create new user data
+     *
+     * @param string  $firstName
+     * @param string  $lastName
+     * @param string  $genter
+     * @return array|null
+     * @throws BadRequestException
+     * 
+     */
+    public function registrationCompleted(string $verifiedToken, string $userUuid, string $firstName, string $lastName, string $gender)
+    {
+        $data = $this->mainRepository->registrationCompleted($verifiedToken, $userUuid, $firstName, $lastName, $gender);
+        if ($data){
+            return $data;
+        }
+        throw new BadRequestException('Invalid Token');
     }
 
     /**

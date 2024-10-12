@@ -2,17 +2,16 @@
 
 namespace App\Services\Auth;
 
+use App\Models\User;
 use LaravelEasyRepository\BaseService;
 
 interface AuthService extends BaseService
 {
-    /**
-     * Create new user
-     *
-     * @param  array|mixed  $data
-     * @return array|mixed
-     */
-    public function register($data);
+    public function register(string $email, string $password, string $verifiedToken);
+
+    public function registrationCompleted(string $verifiedToken, string $userUuid, string $firstName, string $lastName, string $gender);
+
+    public function resendRegistrationMail(string $email);
 
     public function login(string $email, string $password);
 
