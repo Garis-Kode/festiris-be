@@ -37,11 +37,6 @@
                         <tr>
                             <td align="center" valign="center" style="text-align:center; padding-bottom: 10px">
                                 <div style="text-align:center; margin:0 60px 34px 60px">
-                                    <div style="margin-bottom: 10px">
-                                        <img alt="Logo"
-                                             src="https://storage.dinas.social/storage/public_aset/aplans-boster.png"
-                                             style="height: 35px"/>
-                                    </div>
                                     <div
                                         style="font-size: 14px; font-weight: 500; margin-bottom: 27px; font-family:Arial,Helvetica,sans-serif;">
                                         <p style="margin-bottom:9px; color:#181C32; font-size: 22px; font-weight:700">
