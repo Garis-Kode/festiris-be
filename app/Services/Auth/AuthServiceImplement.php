@@ -44,7 +44,8 @@ class AuthServiceImplement extends ServiceApi implements AuthService
      /**
      * Resend registration email
      * @param string $email
-     * @return User|null
+     * @return User|
+     * @throws BadRequestException
      */
     public function resendRegistrationMail(string $email)
     {
@@ -56,6 +57,25 @@ class AuthServiceImplement extends ServiceApi implements AuthService
             $message->to($data->email);
             $message->subject('Verifikasi Akun');
         });
+    }
+
+    /**
+     * Create new user data
+     *
+     * @param string  $firstName
+     * @param string  $lastName
+     * @param string  $genter
+     * @return array|null
+     * @throws BadRequestException
+     * 
+     */
+    public function registrationCompleted(string $verifiedToken, string $userUuid, string $firstName, string $lastName, string $gender)
+    {
+        $data = $this->mainRepository->registrationCompleted($verifiedToken, $userUuid, $firstName, $lastName, $gender);
+        if ($data){
+            return $data;
+        }
+        throw new BadRequestException('Invalid Token');
     }
 
     /**

@@ -9,10 +9,7 @@ interface UserRepository extends Repository
 {
     public function register(string $email, string $password, string $verifiedToken) : User;
 
-    /**
-     * find data by email
-     * @param string $email
-     * @return User
-     */
     public function findByEmail(string $email) : User;
+
+    public function registrationCompleted(string $verifiedToken, string $userUuid, string $firstName, string $lastName, string $gender): ?User;
 }

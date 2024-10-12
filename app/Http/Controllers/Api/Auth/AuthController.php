@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Helpers\Response;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\MailResendRequest;
+use App\Http\Requests\Auth\RegistrationCompletedRequest;
 use App\Http\Requests\Auth\RegistrationRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RefreshTokenRequest;
@@ -27,6 +28,16 @@ class AuthController extends Controller
     public function resendRegistrationMail(MailResendRequest $request){
         $this->authService->resendRegistrationMail($request->validated('email'));
         return Response::success(null, 'Mail sent successfully.');
+    }
+
+
+    public function registrationCompleted($verifiedToken, $userUuid, RegistrationCompletedRequest $request)
+    {
+        // dd([$verifiedToken, $userUuid]);
+        $data = $this->authService->registrationCompleted($verifiedToken, $userUuid, $request->validated('firstName'), $request->validated('lastName'), $request->validated('gender'));
+        return Response::success(
+            new UserResource($data), 'Account completed successfully.'
+        );
     }
 
     public function login(LoginRequest $request)

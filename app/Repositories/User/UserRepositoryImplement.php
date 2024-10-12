@@ -34,4 +34,22 @@ class UserRepositoryImplement extends Eloquent implements UserRepository
         return $this->model->where('email', $email)->first();
     }
 
+    public function registrationCompleted(string $verifiedToken, string $userUuid, string $firstName, string $lastName, string $gender): ?User
+    {
+        $user = $this->model->where('verified_token', $verifiedToken)
+                        ->where('uuid', $userUuid)
+                        ->first();
+        if ($user) {
+            $user->update([
+                'first_name' => $firstName,
+                'last_name'  => $lastName,
+                'gender'     => $gender,    
+                'email_verified_at' => now(),
+                'verified_token' => null
+            ]);
+            return $user;
+        }
+        return null;
+    }
+
 }
