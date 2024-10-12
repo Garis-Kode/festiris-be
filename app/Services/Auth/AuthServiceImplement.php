@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Exceptions\BadRequestException;
 use Exception;
 use App\Models\User;
 use App\Helpers\Response;
@@ -23,21 +24,38 @@ class AuthServiceImplement extends ServiceApi implements AuthService
     /**
      * Create new user data
      *
-     * @param  array|mixed  $data
+     * @param string  $email
+     * @param string  $password
+     * @param string  $verifiedToken
      * @return array|mixed
+     * @throws UnexpectedErrorException
+     * 
      */
     public function register(string $email, string $password, string $verifiedToken)
     {
-        try {
-            $data = $this->mainRepository->register($email, $password, $verifiedToken, $email);
-            Mail::send('email.verified', ['token' => $verifiedToken, 'userId' => $data->uuid, 'email' => $email], function ($message) use ($email) {
-                $message->to($email);
-                $message->subject('Verifikasi Akun');
-            });
-            return $data;
-        } catch (Exception $exception) {
-            throw new UnexpectedErrorException($exception);
+        $response = $this->mainRepository->register($email, $password, $verifiedToken, $email);
+        Mail::send('email.verified', ['token' => $verifiedToken, 'userId' => $response->uuid, 'email' => $email], function ($message) use ($email) {
+            $message->to($email);
+            $message->subject('Verifikasi Akun');
+        });
+        return $response;
+    }
+
+     /**
+     * Resend registration email
+     * @param string $email
+     * @return User|null
+     */
+    public function resendRegistrationMail(string $email)
+    {
+        $data =  $this->mainRepository->findByEmail($email);
+        if ($data->email_verify_at){
+            throw new BadRequestException('Account has been verified');
         }
+        Mail::send('email.verified', ['token' => $data->verified_token, 'userId' => $data->uuid, 'email' => $data->email], function ($message) use ($data) {
+            $message->to($data->email);
+            $message->subject('Verifikasi Akun');
+        });
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Helpers\Response;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\MailResendRequest;
 use App\Http\Requests\Auth\RegistrationRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RefreshTokenRequest;
@@ -21,6 +22,11 @@ class AuthController extends Controller
         return Response::success(
             new UserResource($data), 'Account created successfully.', Response::STATUS_CREATED
         );
+    }
+    
+    public function resendRegistrationMail(MailResendRequest $request){
+        $this->authService->resendRegistrationMail($request->validated('email'));
+        return Response::success(null, 'Mail sent successfully.');
     }
 
     public function login(LoginRequest $request)
